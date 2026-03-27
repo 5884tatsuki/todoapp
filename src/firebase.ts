@@ -14,7 +14,15 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
+
+// Analytics を安全に初期化（エラーが発生しても無視）
+let analytics;
+try {
+    analytics = getAnalytics(app);
+} catch (error) {
+    console.warn("Analytics initialization failed:", error);
+}
+
 const auth = getAuth(app);
 const db = getFirestore(app);
 

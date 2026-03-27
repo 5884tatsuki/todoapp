@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { db } from './firebase'
 import { collection, addDoc, deleteDoc, doc, updateDoc } from 'firebase/firestore'
 import { useAuth, useTodos } from './hooks'
+import CalendarPage from './CalendarPage'
 
 interface Todo {
   id: string
@@ -27,6 +28,7 @@ function Page() {
   const [dueDate, setDueDate] = useState('')
   const [editingTodoId, setEditingTodoId] = useState<string | null>(null)
   const [searchKeyword, setSearchKeyword] = useState('')
+  const [currentView, setCurrentView] = useState<'list' | 'calendar'>('list')
 
   const addTodoMutation = useMutation({
     mutationFn: async (newTodo: Omit<Todo, 'id'>) => {
@@ -89,7 +91,7 @@ function Page() {
       return
     }
 
-    if (title.trim() && content.trim()) {
+    if (title.trim()) {
       try {
         const todoData = {
           title,
@@ -126,6 +128,23 @@ function Page() {
     }
   }
 
+  const handleUpdateTodoFromCalendar = async (updatedTodo: Todo) => {
+    if (!userId) return
+
+    try {
+      const todoData = {
+        title: updatedTodo.title,
+        content: updatedTodo.content,
+        color: updatedTodo.color,
+        dueDate: updatedTodo.dueDate || null
+      }
+      await updateTodoMutation.mutateAsync({ id: updatedTodo.id, todo: todoData as Omit<Todo, 'id'> })
+    } catch (error) {
+      console.error('Error updating todo: ', error)
+      alert('TODOの更新に失敗しました')
+    }
+  }
+
   const handleCloseModal = () => {
     resetForm()
     setIsModalOpen(false)
@@ -150,10 +169,20 @@ function Page() {
     )
   }
 
+  if (currentView === 'calendar') {
+    return (
+      <CalendarPage 
+        todos={todos} 
+        onBack={() => setCurrentView('list')}
+        onEditTodo={handleUpdateTodoFromCalendar}
+        onDeleteTodo={handleDeleteTodo}
+      />
+    )
+  }
+
   return (
     <div className="page">
-      <h1>Welcome to My Page</h1>
-      <p>This is a simple page using React and Vite.</p>
+      <h1>あなたのTodoへようこそ</h1>
 
       <div className="todo-controls">
         <button onClick={handleOpenModal} className="btn-add">+ TODOを追加</button>
@@ -175,6 +204,10 @@ function Page() {
             </button>
           )}
         </div>
+
+        <button onClick={() => setCurrentView('calendar')} className="btn-calendar">
+          📅 カレンダー
+        </button>
       </div>
 
       {isModalOpen && (

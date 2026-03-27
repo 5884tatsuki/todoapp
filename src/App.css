@@ -395,6 +395,22 @@
   color: #333;
 }
 
+.btn-calendar {
+  padding: 10px 20px;
+  background-color: #51cf66;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  white-space: nowrap;
+  transition: background-color 0.2s;
+}
+
+.btn-calendar:hover {
+  background-color: #40c057;
+}
+
 .search-result-count {
   margin-top: 10px;
   margin-bottom: 10px;
